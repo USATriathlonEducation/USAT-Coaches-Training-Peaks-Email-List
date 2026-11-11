@@ -139,6 +139,30 @@
   }
   .tpq-callout strong { font-family: var(--font-heading); color: var(--usat-blue); font-weight: normal; }
   .tpq-callout.active { border-left-color: var(--usat-red); background: var(--red-tint); }
+  .tpq-creds {
+    margin-top: 12px; padding: 12px 14px; background: #fff;
+    border: 1px solid var(--gray-border); border-radius: 4px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .tpq-cred-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tpq-cred-label { font-family: var(--font-heading); font-size: 0.8rem; color: var(--usat-blue); width: 80px; }
+  .tpq-creds code {
+    font-family: Consolas, "Courier New", monospace; font-size: 0.95rem;
+    background: var(--gray-light); padding: 4px 10px; border-radius: 4px; color: var(--gray-dark);
+  }
+  .tpq-copy {
+    font-family: var(--font-body); font-size: 0.8rem; color: var(--usat-blue);
+    background: #fff; border: 1px solid var(--usat-blue); border-radius: 4px;
+    padding: 3px 10px; cursor: pointer;
+  }
+  .tpq-copy:hover { background: var(--blue-tint); }
+  .tpq-copy.done { color: #fff; background: var(--usat-blue); }
+  .tpq-login {
+    align-self: flex-start; margin-top: 4px; font-family: var(--font-heading);
+    font-size: 0.85rem; color: var(--usat-red); text-decoration: none;
+  }
+  .tpq-login:hover { text-decoration: underline; }
+  .tpq-cred-note { font-family: var(--font-light); font-size: 0.8rem; color: var(--gray-mid); margin: 10px 0 0; }
 
   /* Interest table */
   .tpq-matrix { width: 100%; border-collapse: collapse; margin-top: 6px; }
@@ -288,6 +312,20 @@
         <div class="tpq-callout" id="noAcctNote">
           <strong>No TrainingPeaks account? No problem.</strong><br>
           If you do not have a TrainingPeaks account, I will add the plans and libraries to a TrainingPeaks athlete account so you will still be able to access them. Just log in, click on any workout to open it, then copy and paste it into whatever format or platform you normally use.
+          <div class="tpq-creds">
+            <div class="tpq-cred-row">
+              <span class="tpq-cred-label">Username</span>
+              <code id="credUser">USATL1L2L3</code>
+              <button type="button" class="tpq-copy" data-copy="credUser">Copy</button>
+            </div>
+            <div class="tpq-cred-row">
+              <span class="tpq-cred-label">Password</span>
+              <code id="credPass">L1L2L3support</code>
+              <button type="button" class="tpq-copy" data-copy="credPass">Copy</button>
+            </div>
+            <a class="tpq-login" href="https://home.trainingpeaks.com/login" target="_blank" rel="noopener">Log in to TrainingPeaks &rarr;</a>
+          </div>
+          <p class="tpq-cred-note">Please don't change the password or delete anything in this account. It's shared by coaches across all levels.</p>
         </div>
       </div>
 
@@ -378,6 +416,23 @@
     note.classList.toggle('active', off);
   });
 
+  // Copy buttons for the shared login
+  document.querySelectorAll('.tpq-copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = document.getElementById(btn.getAttribute('data-copy')).textContent;
+      var done = function () {
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      } else {
+        var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} document.body.removeChild(ta);
+      }
+    });
+  });
+
   // Highlight plan cards when checked
   document.querySelectorAll('.tpq-card input').forEach(function (cb) {
     cb.addEventListener('change', function () { cb.closest('.tpq-card').classList.toggle('checked', cb.checked); });
@@ -453,7 +508,7 @@
       document.getElementById('thanksName').textContent = payload.firstName;
       if (payload.hasTpAccount === 'No') {
         document.getElementById('thanksMsg').textContent =
-          "I've got your details. I'll set you up with access through a TrainingPeaks athlete account and email the login details to " + payload.contactEmail + ".";
+          "I've got your details. I'll add the plans and libraries you picked to the shared TrainingPeaks athlete account. Log in with Username: USATL1L2L3 and Password: L1L2L3support to open any workout and copy it into the platform you use.";
       }
       form.style.display = 'none';
       document.getElementById('tpqThanks').style.display = 'block';
